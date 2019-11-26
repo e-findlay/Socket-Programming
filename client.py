@@ -1,5 +1,6 @@
 import socket
 import sys
+
 # get servername from cmd line argument
 if len(sys.argv) > 1:
     serverName = sys.argv[1]
@@ -116,8 +117,10 @@ while True:
     # wait for used input
     cmd = input()
     print(cmd)
+    print(len(response))
     if cmd in str(range(1, len(response)+1)):
         msg = 'GET_MESSAGES'
+        print(msg)
         msg += '/' + response[int(cmd)-1]
         GET_MESSAGES(msg)
         

@@ -26,6 +26,7 @@ def getMessages(msg):
     msg = msg.split('/')
     boardName = msg[1]
     filePath = 'board/' + boardName
+    print(filePath)
     filecontent = ''
     filenames = ''
     files = sorted(os.listdir(filePath))
@@ -40,7 +41,7 @@ def getMessages(msg):
             with open(os.path.join(filePath, f)) as file:
                 content = file.read()
                 filecontent += content + '/'
-    reply = filenames + '//' + filecontent
+    reply = filenames + '/' + filecontent
     print(reply)
     return reply
 
@@ -71,7 +72,7 @@ def postMessage(msg):
 
 def getBoards():
         # search boards directory for message boards
-        boards = os.listdir('./board')
+        boards = sorted(os.listdir('./board'))
         reply = ''
         # if no message boards defined, print error and quit program
         if len(boards) == 0:
