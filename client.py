@@ -53,20 +53,21 @@ def getBoards(message):
         clientSocket.close()
         sys.exit()
     # handle error and quit program
-    if response == 'No message boards defined':
-        print(response)
+    if 'error' in response.keys():
+        print(response['error'])
         clientSocket.close()
         sys.exit()
     # convert response to array of message boards
     print(response)
     # print board names to command line
     boardNumber = []
-    for i in range(len(response)):
-        print('{}. {}'.format(i+1,response[i]))
+    for i in range(len(response['boards'])):
+        print('{}. {}'.format(i+1,response['boards'][i]))
         boardNumber.append(str(i+1))
+    print(boardNumber)
     # close connection
     clientSocket.close()
-    return response, boardNumber
+    return response['boards'], boardNumber
 
 
 def getMessages(message):

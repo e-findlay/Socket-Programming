@@ -24,6 +24,7 @@ print(serverPort)
 
 
 def getMessages(msg):
+    time.sleep(4)
     if not msg[1]:
         reply = {'error': 'missing parameter'}
         return reply
@@ -89,15 +90,14 @@ def postMessage(msg):
 def getBoards():
         # search boards directory for message boards
         boards = sorted(os.listdir('board'))
-        reply = ''
+        reply = {'boards': []}
         # if no message boards defined, print error and quit program
         if len(boards) == 0:
             print('No message boards defined')
             sys.exit()
-        reply = []
         for board in boards:
             if not os.path.isfile(os.path.join('board', board)):
-                reply.append(board)
+                reply['boards'].append(board)
         return reply
 
 # create server socket
