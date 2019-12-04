@@ -1,6 +1,8 @@
 import socket
 import sys
+# from os import path, listdir?
 import os
+# delete time before submision?
 import time
 from time import strftime, gmtime
 from datetime import datetime
@@ -24,7 +26,6 @@ print(serverPort)
 
 
 def getMessages(msg):
-    time.sleep(4)
     if not msg[1]:
         reply = {'error': 'missing parameter'}
         return reply

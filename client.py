@@ -141,6 +141,9 @@ def postMessage(message):
 message = ['GET_BOARDS']
 # send message to server to get list of message board names
 response, boardNumber = getBoards(message)
+print('Enter a board number to get a list of messages for the board')
+print('Enter POST to add a message to a board')
+print('Enter QUIT to exit the program')
 
 # keep running until user enters QUIT
 while True:
