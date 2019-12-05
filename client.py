@@ -25,12 +25,14 @@ def receiveAll(socket):
         # if length of part less than 1024 then transmission has finished
         if len(part) < 1024:
             break
+    # decode message and return
     return data.decode()
         
 
 def getBoards(message):
     # create client socket
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # set 10 second time limit
     clientSocket.settimeout(10)
     # attempt to connect to server
     try:
@@ -40,14 +42,12 @@ def getBoards(message):
         print('Server not available')
         sys.exit()
     message = json.dumps(message)
-    print(message)
     # send command to server
     clientSocket.send(message.encode())
     # decode response
     try:
         response = receiveAll(clientSocket)
         response = json.loads(response)
-        print(response)
     except socket.timeout:
         print('Timeout Error')
         clientSocket.close()
@@ -57,14 +57,11 @@ def getBoards(message):
         print(response['error'])
         clientSocket.close()
         sys.exit()
-    # convert response to array of message boards
-    print(response)
     # print board names to command line
     boardNumber = []
     for i in range(len(response['boards'])):
         print('{}. {}'.format(i+1,response['boards'][i]))
         boardNumber.append(str(i+1))
-    print(boardNumber)
     # close connection
     clientSocket.close()
     return response['boards'], boardNumber
@@ -73,9 +70,9 @@ def getBoards(message):
 def getMessages(message):
     # create client socket
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # set 10 second time limit
     clientSocket.settimeout(10)
     message = json.dumps(message)
-    print(message)
     msg = message.encode()
     # attempt to connect to server
     try:
@@ -86,13 +83,13 @@ def getMessages(message):
         sys.exit()
     clientSocket.send(msg)
     try:
-        response = receiveAll(clientSocket)
+        getResponse = receiveAll(clientSocket)
     except socket.timeout as error:
         print('Timeout error')
         clientSocket.close()
         sys.exit()
     # separate response into arrays for message titles and message content
-    messages = json.loads(response)
+    messages = json.loads(getResponse)
     if 'error' in messages.keys():
         print(messages['error'])
         clientSocket.close()
@@ -110,6 +107,7 @@ def getMessages(message):
 def postMessage(message):
     # create client socket
     clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # set 10 second time limit
     clientSocket.settimeout(10)
     # attempt to connect to server
     try:
@@ -119,28 +117,27 @@ def postMessage(message):
         print('Server not available')
         sys.exit()
     message = json.dumps(message)
-    print(message)
     msg = message.encode()
     clientSocket.send(msg)
     try:
-        response = receiveAll(clientSocket)
+        postResponse = receiveAll(clientSocket)
     except socket.timeout:
         print('Timeout Error')
         clientSocket.close()
         sys.exit()
-    response = json.loads(response)
-    if 'error' in response.keys():
-        print(response['error'])
+    postResponse = json.loads(postResponse)
+    if 'error' in postResponse.keys():
+        print(postResponse['error'])
         clientSocket.close()
         return
-    print(response['success'])
+    print(postResponse['success'])
     # close connection
     clientSocket.close()
 
 
 message = ['GET_BOARDS']
 # send message to server to get list of message board names
-response, boardNumber = getBoards(message)
+nameList, numberList = getBoards(message)
 print('Enter a board number to get a list of messages for the board')
 print('Enter POST to add a message to a board')
 print('Enter QUIT to exit the program')
@@ -149,25 +146,23 @@ print('Enter QUIT to exit the program')
 while True:
     # wait for used input
     cmd = input()
-    print(cmd)
     # check if input is for getMessages
-    if cmd in boardNumber:
+    if cmd in numberList:
         msg = ['GET_MESSAGES']
-        print(msg)
-        print(response)
-        msg.append(response[int(cmd)-1])
-        print(msg)
+        msg.append(nameList[int(cmd)-1])
         getMessages(msg)
 
     # check if input is for postMessage
     elif cmd == 'POST':
         msg = ['POST_MESSAGE']
+        # get number of board from user
         boardNumber = input('Which board would you like to post to? \n')
-        boardName = response[int(boardNumber) - 1]
+        boardName = nameList[int(boardNumber) - 1]
         msg.append(boardName)
+        # get message title from user
         msgTitle = input('Enter your message title: \n')
-        print(msgTitle == str)
         msg.append(msgTitle)
+        # get message content from user
         msgContent = input('Enter your message content: \n')
         msg.append(msgContent)
         postMessage(msg)
@@ -186,16 +181,16 @@ while True:
         # try to connect clientSocket
         try:
             clientSocket.connect((serverName, serverPort))
-            # print error and quit program if connection unsuccessful
+        # print error and quit program if connection unsuccessful
         except:
             print('Server not available')
             sys.exit()
         msg = json.dumps(cmd)
         msg = msg.encode()
         clientSocket.send(msg)
-        # 
+        # try decoding response
         try:
-            invalidResponse = clientSocket.recv(1024).decode()
+            invalidResponse = receiveAll(clientSocket)
         # print timeout error if no response in 10 seconds
         except socket.timeout:
             print('Timeout Error')
@@ -203,10 +198,13 @@ while True:
             sys.exit()
         # print error message from server
         invalidResponse = json.loads(invalidResponse)
+        # print error message if response returns an error
         if 'error' in invalidResponse.keys():
             print(invalidResponse['error'])
+        # print response
         else:
             print(invalidResponse)
+        # close socket
         clientSocket.close()
 
         
