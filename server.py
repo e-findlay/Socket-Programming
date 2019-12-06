@@ -35,14 +35,14 @@ def getMessages(msg):
     filenames = []
     # get reverse sorted list of filenames in required message board directory
     files = sorted(listdir(filePath))[::-1]
-    # filter files list to ensure only files are included
-    files = [f for f in files if path.isfile(path.join(filePath, f)) and not f.startswith('.')]
+    # filter files list to ensure only files are included and remove any .DS_Store files
+    files = [f.replace('_', ' ') for f in files if path.isfile(path.join(filePath, f)) and not f.startswith('.DS_Store')]
     # select 100 most recent files if more than 100 files
     if len(files) > 100:
         files = files[:100]
     for f in files:
         # open file and append content to array
-        with open(path.join(filePath, f)) as file:
+        with open(path.join(filePath, f.replace(' ', '_'))) as file:
             content = file.read()
             fileContent.append(content)
     reply = {'files': files, 'content': fileContent}
@@ -62,7 +62,7 @@ def postMessage(msg):
     if not msg[2]:
         reply = {'error': 'missing parameter'}
         return reply
-    messageTitle = msg[2]
+    messageTitle = msg[2].replace(' ', '_')
     # check message contains required parameter for content
     if not msg[3]:
         reply = {'error': 'missing parameter'}
@@ -85,16 +85,15 @@ def postMessage(msg):
 
 
 def getBoards():
-        # search boards directory for message boards
-        boards = sorted(listdir('board'))
+        # get message boards from board directory
+        boards = [i for i in listdir('board') if not i.startswith('.DS_Store')]
+        # return error if no message boards found
         reply = {'boards': []}
-        # if no message boards defined, print error and quit program
-        if len(boards) == 0:
-            print('No message boards defined')
-            sys.exit()
         for board in boards:
             if not path.isfile(path.join('board', board)):
                 reply['boards'].append(board)
+        if len(reply['boards']) == 0:
+            return {'error': 'No boards found'}
         return reply
 
 # create server socket
@@ -176,8 +175,10 @@ def clientThread(connection, address):
 
 # infinite loop to create thread for each new request
 while True:
+    # filter out .DS_Store files
+    boards = [i for i in listdir('board') if not i.startswith('.DS_Store')]
     # return error and quit if no message boards defined
-    if len(listdir('board')) == 0:
+    if len(boards) == 0:
         print('No message boards defined')
         sys.exit()
     try:
