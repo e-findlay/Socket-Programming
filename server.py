@@ -1,6 +1,5 @@
 import socket
 import sys
-# from os import path, listdir?
 from os import path, listdir
 from time import strftime, gmtime
 from datetime import datetime
